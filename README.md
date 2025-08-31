@@ -1,2 +1,1 @@
-# Joshua-Sun-CompSci-Joshua-Sun-CompSci.github.io
-P0
+# Joshua-Sun-CS280.github.io
