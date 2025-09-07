@@ -73,6 +73,7 @@
   <section>
     <h2>Overview</h2>
     <p>
+      The goal of this project is to take the digitized Prokudin-Gorskii glass plate images and automatically produce a color image.
       The input is a single grayscale plate stacked vertically in the order <strong>B, G, R</strong>.
       I split the image into three equal parts, then align the <em>G</em> and <em>R</em> channels to <em>B</em>.
     </p>
@@ -86,8 +87,8 @@
       large displacements to be found quickly while keeping runtime reasonable.
     </p>
     <p>
-      For similarity scoring, I tested multiple options. NCC and SSD work on
-      intensities, but I also implemented <strong>Canny edge features</strong>
+      For similarity scoring, I tested multiple options. NCC worked fine, 
+      but I also implemented <strong>Canny edge features</strong>
       for robustness in cases where brightness differs across channels.
     </p>
     <p>
