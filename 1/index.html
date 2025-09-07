@@ -89,29 +89,73 @@
     <p>
       For similarity scoring, I tested multiple options. NCC worked fine, 
       but I also implemented <strong>Canny edge features</strong>
-      for robustness in cases where brightness differs across channels.
+      for a more robust alignment.
     </p>
     <p>
-      After alignment, I apply simple post-processing steps:
+      Besides simple alignment, I also implemented these bells and whistles:
     </p>
     <ul>
-      <li><strong>Auto-contrast</strong> — stretch intensities so the darkest pixel is 0 and the brightest is 1.</li>
-      <li><strong>White balance</strong> — normalize means of the three channels (gray-world assumption).</li>
-      <li><strong>Automatic cropping</strong> — detect and remove noisy borders based on variance and pixel sums.</li>
+      <li><strong>Automatic cropping</strong> — Crops the image borders by filtering out low variance or low mean value rows/cols; done after alignment.</li>
+      <li><strong>Automatic contrasting</strong> — Maps the darkest pixel to 0 and the brighest to 1 and applied linear transformation on all pixels; done before alignment.</li>
+      <li><strong>Automatic white balance</strong> — Assumes gray-world illumination to shift all 3 colors towards the gray mean; done before alignment.</li>
+      <li><strong>Better color mapping</strong> — Normalizes the average pixel value to gray; done before alignment.</li>
+      <li><strong>Better features</strong> — Uses canny filter for alignment instead of NCC; used during alignment.</li>
+    </ul>
+    </ul>
     </ul>
   </section>
 
   <section>
     <h2>Results</h2>
     <div class="result">
-      <img src="results/cathedral_out.jpg" alt="cathedral"/>
+      <img src="output/emir.jpg" alt="emir"/>
+      <div><strong>emir</strong><br>Green offset: (+23, +49)<br>Red offset: (+40, +107)</div>
+    </div>
+    <div class="result">
+      <img src="output/church.jpg" alt="church"/>
+      <div><strong>church</strong><br>Green offset: (+4, +25)<br>Red offset: (-4, +58)</div>
+    </div>
+    <div class="result">
+      <img src="output/harvesters.jpg" alt="harvesters"/>
+      <div><strong>harvesters</strong><br>Green offset: (+18, +60)<br>Red offset: (+11, +118)</div>
+    </div>
+    <div class="result">
+      <img src="output/icon.jpg" alt="icon"/>
+      <div><strong>icon</strong><br>Green offset: (+16, +38)<br>Red offset: (+22, +90)</div>
+    </div>
+    <div class="result">
+      <img src="output/cathedral.jpg" alt="cathedral"/>
       <div><strong>cathedral</strong><br>Green offset: (+2, +5)<br>Red offset: (+3, +12)</div>
     </div>
     <div class="result">
-      <img src="results/church_out.jpg" alt="church"/>
+      <img src="output/church.jpg" alt="church"/>
       <div><strong>church</strong><br>Green offset: (+4, +25)<br>Red offset: (-4, +58)</div>
     </div>
-    <!-- repeat for other images -->
+    <div class="result">
+      <img src="output/cathedral.jpg" alt="cathedral"/>
+      <div><strong>cathedral</strong><br>Green offset: (+2, +5)<br>Red offset: (+3, +12)</div>
+    </div>
+    <div class="result">
+      <img src="output/church.jpg" alt="church"/>
+      <div><strong>church</strong><br>Green offset: (+4, +25)<br>Red offset: (-4, +58)</div>
+    </div>
+    <div class="result">
+      <img src="output/cathedral.jpg" alt="cathedral"/>
+      <div><strong>cathedral</strong><br>Green offset: (+2, +5)<br>Red offset: (+3, +12)</div>
+    </div>
+    <div class="result">
+      <img src="output/church.jpg" alt="church"/>
+      <div><strong>church</strong><br>Green offset: (+4, +25)<br>Red offset: (-4, +58)</div>
+    </div>
+    <div class="result">
+      <img src="output/cathedral.jpg" alt="cathedral"/>
+      <div><strong>cathedral</strong><br>Green offset: (+2, +5)<br>Red offset: (+3, +12)</div>
+    </div>
+    <div class="result">
+      <img src="output/church.jpg" alt="church"/>
+      <div><strong>church</strong><br>Green offset: (+4, +25)<br>Red offset: (-4, +58)</div>
+    </div>
+    
   </section>
 
   <section>
