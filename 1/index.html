@@ -178,36 +178,28 @@
   <section>
     <h2>Problems & Failures</h2>
     <p>
-      Some images did not align perfectly. For example, <em>Emir</em> has very
-      different brightness levels between channels, making intensity-based
-      metrics fail. Using edge-based alignment improved results, but some
-      misalignment still remains.
-    </p>
-    <p>
-      Borders are also difficult to handle because they contain strong edges
-      that do not correspond between channels. Automatic cropping helps reduce
-      this effect.
+      The biggest problem I encountered is border detection. I tried multiple methods: detect
+      boarder based on variance, intensity, or gradient, and every combination between these three.
+      However, no matter how hard I try, I cannot detect border perfectly for every image because of the 
+      noise on the border (some has numbers on the border, some has stains, etc.). The final approach is 
+      to use a mix of all three methods, find the border on each r,g and b image, then find the IoU region
+      as the final result. Although borders are still visible on some images, borders are much smaller than
+      without applying the algorithm.
     </p>
   </section>
 
   <section>
-    <h2>Bells & Whistles</h2>
-    <h3>Edge-based Alignment</h3>
-    <p>
-      I use <strong>Canny edge detection</strong> to align difficult cases such
-      as <em>Emir</em>, where brightness differences cause failures in raw
-      pixel metrics.
-    </p>
-    <h3>Automatic Cropping</h3>
-    <p>
-      By measuring row and column variance, I detect low-information borders and
-      trim them away automatically.
-    </p>
-    <h3>White Balance</h3>
-    <p>
-      I normalize channel means under the gray-world assumption to reduce color
-      cast and improve overall balance.
-    </p>
+    <h2>Bells & Whistles Comparison</h2>
+    <h3>Without bells & Whistles</h3>
+    <div class="result">
+      <img src="output/master_original.jpg" alt="master_original"/>
+      <div><strong>master_original</strong><br>Green offset: (+3, +3)<br>Red offset: (+3, +6)</div>
+    </div>
+    <h3>With bells & Whistles</h3>
+    <div class="result">
+      <img src="output/master.jpg" alt="master"/>
+      <div><strong>master</strong><br>Green offset: (+3, +3)<br>Red offset: (+3, +6)</div>
+    </div>
   </section>
 </main>
 
