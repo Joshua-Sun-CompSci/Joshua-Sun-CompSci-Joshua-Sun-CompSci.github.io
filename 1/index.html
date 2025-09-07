@@ -74,12 +74,30 @@
     <h2>Overview</h2>
     <p>
       The input is a single grayscale plate stacked vertically in the order <strong>B, G, R</strong>.
-      I split the image into three equal parts, then align the <em>G</em> and <em>R</em> channels to <em>B</em>
-      using a search over integer translations...
+      I split the image into three equal parts, then align the <em>G</em> and <em>R</em> channels to <em>B</em>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Approach</h2>
+    <p>
+      To align channels, I implemented a pyramid search: start at low resolution
+      for efficiency, then refine offsets at higher resolutions. This allows
+      large displacements to be found quickly while keeping runtime reasonable.
     </p>
     <p>
-      To keep the match robust, scoring is computed on the interior...
+      For similarity scoring, I tested multiple options. NCC and SSD work on
+      intensities, but I also implemented <strong>Canny edge features</strong>
+      for robustness in cases where brightness differs across channels.
     </p>
+    <p>
+      After alignment, I apply simple post-processing steps:
+    </p>
+    <ul>
+      <li><strong>Auto-contrast</strong> — stretch intensities so the darkest pixel is 0 and the brightest is 1.</li>
+      <li><strong>White balance</strong> — normalize means of the three channels (gray-world assumption).</li>
+      <li><strong>Automatic cropping</strong> — detect and remove noisy borders based on variance and pixel sums.</li>
+    </ul>
   </section>
 
   <section>
@@ -105,14 +123,37 @@
   </section>
 
   <section>
-    <h2>Bells & Whistles</h2>
-    <h3>Better Features (Edges)</h3>
+    <h2>Problems & Failures</h2>
     <p>
-      For challenging plates like <em>Emir</em>, I align on <strong>Canny edges</strong>...
+      Some images did not align perfectly. For example, <em>Emir</em> has very
+      different brightness levels between channels, making intensity-based
+      metrics fail. Using edge-based alignment improved results, but some
+      misalignment still remains.
     </p>
-    <h3>Automatic Contrast</h3>
     <p>
-      After alignment I apply a per-channel percentile stretch...
+      Borders are also difficult to handle because they contain strong edges
+      that do not correspond between channels. Automatic cropping helps reduce
+      this effect.
+    </p>
+  </section>
+
+  <section>
+    <h2>Bells & Whistles</h2>
+    <h3>Edge-based Alignment</h3>
+    <p>
+      I use <strong>Canny edge detection</strong> to align difficult cases such
+      as <em>Emir</em>, where brightness differences cause failures in raw
+      pixel metrics.
+    </p>
+    <h3>Automatic Cropping</h3>
+    <p>
+      By measuring row and column variance, I detect low-information borders and
+      trim them away automatically.
+    </p>
+    <h3>White Balance</h3>
+    <p>
+      I normalize channel means under the gray-world assumption to reduce color
+      cast and improve overall balance.
     </p>
   </section>
 </main>
