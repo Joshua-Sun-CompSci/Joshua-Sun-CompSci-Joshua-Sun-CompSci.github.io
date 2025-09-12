@@ -44,16 +44,6 @@
       width: 220px;
       border-radius: 8px;
     }
-    .favorites {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    .favorites img {
-      width: 280px;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    }
     footer {
       text-align: center;
       color: #6b7280;
@@ -80,33 +70,29 @@
   </section>
 
   <section>
-    <h2>Approach</h2>
+    <h2>Single-Scale Alignment</h2>
     <p>
-      To align channels, I implemented a pyramid search: start at low resolution
-      for efficiency, then refine offsets at higher resolutions. This allows
-      large displacements to be found quickly while keeping runtime reasonable.
+      As a baseline, I implemented single-scale alignment using NCC. This method worked surprisingly well after pre-processes the image. The idea is first pre-process the image (see bells&whistles section), then within the [-15,15] pixel range, find the best alignment such that the NCC value is maximized. Blue is used as a reference picture while green and red are moved with (x,y) pixels to align with blue.
     </p>
-    <p>
-      For similarity scoring, I tested multiple options. NCC worked fine, 
-      but I also implemented <strong>Canny edge features</strong>
-      for a more robust alignment.
-    </p>
-    <p>
-      Besides simple alignment, I also implemented these bells and whistles:
-    </p>
-    <ul>
-      <li><strong>Automatic cropping</strong> — Crops the image borders by filtering out low variance or low mean value rows/cols; done after alignment.</li>
-      <li><strong>Automatic contrasting</strong> — Maps the darkest pixel to 0 and the brighest to 1 and applied linear transformation on all pixels; done before alignment.</li>
-      <li><strong>Automatic white balance</strong> — Assumes gray-world illumination to shift all 3 colors towards the gray mean; done before alignment.</li>
-      <li><strong>Better color mapping</strong> — Normalizes the average pixel value to gray; done before alignment.</li>
-      <li><strong>Better features</strong> — Uses canny filter for alignment instead of NCC; used during alignment.</li>
-    </ul>
-    </ul>
-    </ul>
+    <div class="result"> 
+      <img src="output/cathedral.jpg" alt="cathedral"/> 
+      <div><strong>cathedral</strong><br>Green offset: (+2, +5)<br>Red offset: (+3, +12)</div> 
+    </div>
+    <div class="result"> 
+      <img src="output/monastery.jpg" alt="monastery"/> 
+      <div><strong>monastery</strong><br>Green offset: (+2, -3)<br>Red offset: (+2, +3)</div> 
+    </div>
+    <div class="result"> 
+      <img src="output/tobolsk.jpg" alt="tobolsk"/> 
+      <div><strong>tobolsk</strong><br>Green offset: (+3, +3)<br>Red offset: (+3, +6)</div> 
+    </div>
   </section>
 
   <section>
-    <h2>Results</h2>
+    <h2>Multi-Scale Pyramid Alignment</h2>
+    <p>
+      To handle larger displacements efficiently, I implemented a pyramid search: start at low resolution for coarse alignment, then refine at higher resolutions. NCC is also used here, and the idea is similar: first pre-process the image (see bells&whistles section), then scale down the image by factor of 2 until it is smaller than 200*200 pixel. Then, within the [-15,15] pixel range, find the best alignment such that the NCC value is maximized. After that, use the 2x bigger image and find the best alignment within the [-1,1] range, as these are the only possible pixels after scaling up. Blue is used as a reference picture while green and red are moved with (x,y) pixels to align with blue.
+    </p>
     <div class="result">
       <img src="output/emir.jpg" alt="emir"/>
       <div><strong>emir</strong><br>Green offset: (+23, +49)<br>Red offset: (+40, +107)</div>
@@ -151,46 +137,82 @@
       <img src="output/three_generations.jpg" alt="three_generations"/>
       <div><strong>three_generations</strong><br>Green offset: (+17, +57)<br>Red offset: (+12, +115)</div>
     </div>
+  </section>
+
+  <section>
+    <h2>Bells & Whistles</h2>
+
+    <h3>1. Automatic Contrasting</h3>
+    <p>
+      I remap pixel intensities so the darkest pixel becomes 0 and the brightest becomes 1. This enhances dynamic range and improves visibility, especially in underexposed or flat-looking images. The before and after comparison shows clear difference, thus this is an important feature.
+    </p>
     <div class="result">
-      <img src="output/cathedral.jpg" alt="cathedral"/>
-      <div><strong>cathedral</strong><br>Green offset: (+2, +5)<br>Red offset: (+3, +12)</div>
+      <img src="output/self_portrait_no_contrast.jpg" alt="before contrast"/>
+      <div><strong>Before contrast</strong></div>
     </div>
     <div class="result">
-      <img src="output/monastery.jpg" alt="monastery"/>
-      <div><strong>monastery</strong><br>Green offset: (+2, -3)<br>Red offset: (+2, +3)</div>
+      <img src="output/self_portrait.jpg" alt="after contrast"/>
+      <div><strong>After contrast</strong></div>
+    </div>
+
+    <h3>2. Automatic White Balance</h3>
+    <p>
+      I apply the <em>gray-world assumption</em>: if the average of all colors should be gray, then scale each channel so its mean matches the global mean. This removes strong color casts (e.g., overly blue or yellow images). The result does not show huge difference, partially because of the lighting in this picture is already gray-world and the pixel value are distributed with a gray-world mean.
+    </p>
+    <div class="result">
+      <img src="output/self_portrait_no_wb.jpg" alt="before wb"/>
+      <div><strong>Before white balance</strong></div>
     </div>
     <div class="result">
-      <img src="output/tobolsk.jpg" alt="tobolsk"/>
-      <div><strong>tobolsk</strong><br>Green offset: (+3, +3)<br>Red offset: (+3, +6)</div>
+      <img src="output/self_portrait.jpg" alt="after wb"/>
+      <div><strong>After white balance</strong></div>
     </div>
-    
+
+    <h3>3. Better Color Mapping</h3>
+    <p>
+      To normalize colors, I adjust each channel so the average intensity maps closer to a neutral gray. This reduces bias from one dominant channel and produces more natural-looking results. As shown in the result, before the color mapping, the image seems like it has a "vintage filter" on it. The color mapping successfully removed the "filter", making the picture more realistic.
+    </p>
+    <div class="result">
+      <img src="output/self_portrait_no_cm.jpg" alt="before colormap"/>
+      <div><strong>Before color mapping</strong></div>
+    </div>
+    <div class="result">
+      <img src="output/self_portrait.jpg" alt="after colormap"/>
+      <div><strong>After color mapping</strong></div>
+    </div>
+
+    <h3>4. Automatic Cropping</h3>
+    <p>
+      Many plates have thick borders, numbers, or stains. I detect rows/columns with low variance or low mean intensity, compute bounding boxes for each channel, and take their intersection (IoU). This significantly reduces visible borders. However, it is not yet perfect, reasons are explained in the Failure Section below.
+    </p>
+    <div class="result">
+      <img src="output/self_portrait_no_crop.jpg" alt="before crop"/>
+      <div><strong>Before cropping</strong></div>
+    </div>
+    <div class="result">
+      <img src="output/self_portrait.jpg" alt="after crop"/>
+      <div><strong>After cropping</strong></div>
+    </div>
+
+    <h3>5. Better Features (Canny Edges)</h3>
+    <p>
+      Instead of using raw pixel values with NCC, I align based on <strong>Canny edge maps</strong>. Edges are less sensitive to brightness differences and highlight structural details, making alignment more robust in cases where intensity differs between channels. In this case, both NCC and Canny filter worked perfectly, and the shift turned out to be the same :)
+    </p>
+    <div class="result">
+      <img src="output/self_portrait_ncc.jpg" alt="harvesters edges"/>
+      <div><strong>harvesters (edge features)</strong></div>
+    </div>
+    <div class="result">
+      <img src="output/self_portrait.jpg" alt="icon edges"/>
+      <div><strong>icon (edge features)</strong></div>
+    </div>
   </section>
 
   <section>
     <h2>Problems & Failures</h2>
     <p>
-      The biggest problem I encountered is border detection. I tried multiple methods: detect
-      boarder based on variance, intensity, or gradient, and every combination between these three.
-      However, no matter how hard I try, I cannot detect border perfectly for every image because of the 
-      noise on the border (some has numbers on the border, some has stains, etc.). The final approach is 
-      to use a mix of all three methods, find the border on each r,g and b image, then find the IoU region
-      as the final result. Although borders are still visible on some images, borders are much smaller than
-      without applying the algorithm.
+      The biggest problem I encountered is border detection. I tried multiple methods: detect boarder based on variance, intensity, or gradient, and every combination between these three. However, no matter how hard I try, I cannot detect border perfectly for every image because of the noise on the border (some has numbers on the border, some has stains, etc.). The final approach is to use a mix of all three methods, find the border on each r,g and b image, then find the IoU region as the final result. Although borders are still visible on some images, borders are much smaller than without applying the algorithm.
     </p>
-  </section>
-
-  <section>
-    <h2>Bells & Whistles Comparison</h2>
-    <h3>Without bells & Whistles</h3>
-    <div class="result">
-      <img src="output/master_original.jpg" alt="master_original"/>
-      <div><strong>master_original</strong><br>Green offset: (+0, +54)<br>Red offset: (+1, +102)</div>
-    </div>
-    <h3>With bells & Whistles</h3>
-    <div class="result">
-      <img src="output/master.jpg" alt="master"/>
-      <div><strong>master</strong><br>Green offset: (+37, +49)<br>Red offset: (+54, +113)</div>
-    </div>
   </section>
 </main>
 
